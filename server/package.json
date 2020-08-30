@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "deploy": "./scripts/deploy.sh"
+  },
+  "devDependencies": {
+    "serverless": "^1.79.0"
+  }
+}
