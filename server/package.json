@@ -1,4 +1,7 @@
 {
+  "name": "oh-hell-sockets",
+  "license": "UNLICENSED",
+  "version": "0.1.0",
   "scripts": {
     "deploy": "./scripts/deploy.sh"
   },

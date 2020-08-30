@@ -5,19 +5,51 @@ provider:
   runtime: nodejs12.x
   websocketsApiName: custom-websockets-api-name
   websocketsApiRouteSelectionExpression: $request.body.action # custom routes are selected by the value of the action property in the body
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 'lambda:InvokeFunction'
+      Resource:
+        - 'arn:aws:lambda:*:*:function:*'
+    - Effect: Allow
+      Action:
+        - 'logs:CreateLogGroup'
+        - 'logs:CreateLogStream'
+        - 'logs:PutLogEvents'
+        - 'ec2:CreateNetworkInterface'
+        - 'ec2:DescribeNetworkInterfaces'
+        - 'ec2:DeleteNetworkInterface'
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - 'rds-db:connect'
+      Resource:
+        - '*'
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:us-east-1:234250736261:table/simplechat_connections"
+  environment:
+    SERVICE: '${self:service}'
+    STAGE: '${self:provider.stage}'
+    VERSION: '${file(package.json):version}'
+    TABLE_NAME: 'simplechat_connections'
 
 functions:
   connectHandler:
-    handler: handlers.onconnect
+    handler: handlers.connectHandler
     events:
-      - websocket:
-          route: $disconnect
+      - websocket: $connect
   disconnectHandler:
-    handler: handlers.ondisconnect
+    handler: handlers.disconnectHandler
     events:
-        - websocket:
-            route: $disconnect
+      - websocket: $disconnect
   defaultHandler:
-    handler: handler.defaultHandler
+    handler: handlers.defaultHandler
     events:
       - websocket: $default #simple event definition without extra route property
