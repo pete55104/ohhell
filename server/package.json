@@ -1,0 +1,11 @@
+{
+  "name": "oh-hell-sockets",
+  "license": "UNLICENSED",
+  "version": "0.1.0",
+  "scripts": {
+    "deploy": "./scripts/deploy.sh"
+  },
+  "devDependencies": {
+    "serverless": "^1.79.0"
+  }
+}
