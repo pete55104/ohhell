@@ -14,6 +14,17 @@ class App extends Component {
         };
     }
 
+    sendHardcodedMessage() {
+        client.send(JSON.stringify({"action":"sendmessage", "data":"hello world"}));
+    }
+
+    sendCustomMessage() {
+        let customText: any;
+        // @ts-ignore
+        customText = document.getElementById('customTextField').value;
+        client.send(JSON.stringify({"action":"sendmessage", "data":customText}));
+    }
+
     render() {
         return (
             <div className="App">
@@ -27,6 +38,17 @@ class App extends Component {
                         Learn React
                     </a>
                 </header>
+                <button
+                    onClick={this.sendHardcodedMessage}
+                >
+                    Send hello world
+                </button>
+                <input type="text" id="customTextField" defaultValue={"Your text"}></input>
+                <button
+                    onClick={this.sendCustomMessage}
+                >
+                    Send your custom text
+                </button>
             </div>
         );
     }
