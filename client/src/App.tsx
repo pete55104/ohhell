@@ -11,8 +11,24 @@ class App extends Component {
         };
         client.onmessage = (message) => {
             console.log(message);
+            console.log("Response data: " + message.data);
+            let responseDiv = document.getElementById("response");
+            let responseText = document.createTextNode(message.toString());
+            // @ts-ignore
+            responseDiv.appendChild(responseText);
+            /*
+            Pick up where you left off...
+            use foreach or something similar to run through each property and print on screen
+
+             */
+
+
+
+
         };
     }
+
+
 
     sendHardcodedMessage() {
         client.send(JSON.stringify({"action":"sendmessage", "data":"hello world"}));
@@ -49,6 +65,7 @@ class App extends Component {
                 >
                     Send your custom text
                 </button>
+                <div id={"response"}></div>
             </div>
         );
     }
