@@ -1,34 +1,41 @@
 import React, {Component} from 'react';
 import './App.css';
-import { w3cwebsocket as W3CWebSocket } from "websocket";
+import {IMessageEvent, w3cwebsocket as W3CWebSocket} from "websocket";
 
 const client = new W3CWebSocket('wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev');
 
 class App extends Component {
+
     componentDidMount() {
         client.onopen = () => {
-            console.log('WebSocket Client Connected');
+            //console.log('WebSocket Client Connected');
         };
         client.onmessage = (message) => {
             console.log(message);
-            console.log("Response data: " + message.data);
-            let responseDiv = document.getElementById("response");
-            let responseText = document.createTextNode(message.toString());
-            // @ts-ignore
-            responseDiv.appendChild(responseText);
-            /*
-            Pick up where you left off...
-            use foreach or something similar to run through each property and print on screen
-
-             */
-
-
-
-
+            this.writeMessageToScreen(message);
         };
     }
 
+    writeMessageToScreen(obj: Object) {
+        let theDiv = document.getElementById("responseDisplay");
+        // @ts-ignore
+        theDiv.innerHTML = "";
 
+        for (let prop in obj) {
+            // @ts-ignore
+            if (obj[prop] instanceof Object) {
+
+                //  ** If it matters, print nested layers of objects here **
+
+
+                // @ts-ignore
+                theDiv.innerHTML += (prop + " : " + obj[prop] + "\n");
+            } else {
+                // @ts-ignore
+                theDiv.innerHTML += (prop + " : " + obj[prop] + "\n");
+            }
+        }
+    }
 
     sendHardcodedMessage() {
         client.send(JSON.stringify({"action":"sendmessage", "data":"hello world"}));
@@ -45,31 +52,21 @@ class App extends Component {
         return (
             <div className="App">
                 <header className="App-header">
-                    <a
-                        className="App-link"
-                        href="https://reactjs.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Learn React
-                    </a>
+                    <button onClick={this.sendHardcodedMessage}>
+                        Send hello world
+                    </button>
+                    <input type="text" id="customTextField" defaultValue={"Your text"}>
+                    </input>
+                    <button onClick={this.sendCustomMessage}>
+                        Send your custom text
+                    </button>
                 </header>
-                <button
-                    onClick={this.sendHardcodedMessage}
-                >
-                    Send hello world
-                </button>
-                <input type="text" id="customTextField" defaultValue={"Your text"}></input>
-                <button
-                    onClick={this.sendCustomMessage}
-                >
-                    Send your custom text
-                </button>
-                <div id={"response"}></div>
+                <pre>
+                    <div id={"responseDisplay"}></div>
+                </pre>
             </div>
         );
     }
 }
-
 
 export default App;
