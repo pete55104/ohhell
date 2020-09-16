@@ -1,68 +1,89 @@
 import React, {Component} from 'react';
 import './App.css';
-import {IMessageEvent, w3cwebsocket as W3CWebSocket} from "websocket";
+import {w3cwebsocket as W3CWebSocket} from "websocket";
 
 const client = new W3CWebSocket('wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev');
 
-class App extends Component {
+export interface ICustomAppState {
+    data?: string;
+    timeStamp?: number;
+    origin?: string;
+    isTrusted?: boolean;
+}
+
+
+class App extends Component<ICustomAppState> {
+
+    constructor(props: any) {
+        super(props);
+        this.state = {
+            data: props.data || "defaultName",
+            timeStamp: props.timeStamp || 12345,
+            origin: props.origin ||  "somewhereCool.6789",
+            isTrusted: props.isTrusted || true
+        };
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
 
     componentDidMount() {
         client.onopen = () => {
-            //console.log('WebSocket Client Connected');
+            console.log('WebSocket Client Connected');
         };
         client.onmessage = (message) => {
             console.log(message);
             this.writeMessageToScreen(message);
+            this.setState({
+                data: message.data,
+                // @ts-ignore
+                timeStamp: message.timeStamp,
+                // @ts-ignore
+                origin: message.origin,
+                // @ts-ignore
+                isTrusted: message.isTrusted
+            });
+            // @ts-ignore
+            console.log(this.state.data);
+            // @ts-ignore
+            console.log(this.state.isTrusted);
+            // @ts-ignore
+            console.log(this.state.timeStamp);
+            // @ts-ignore
+            console.log(this.state.origin);
         };
     }
 
     writeMessageToScreen(obj: Object) {
-        let theDiv = document.getElementById("responseDisplay");
-        // @ts-ignore
-        theDiv.innerHTML = "";
-
-        for (let prop in obj) {
-            // @ts-ignore
-            if (obj[prop] instanceof Object) {
-
-                //  ** If it matters, print nested layers of objects here **
-
-
+        let displayDiv = document.getElementById("responseDisplay");
+        if (displayDiv){
+            displayDiv.innerHTML = "";
+            for (let prop in obj) {
                 // @ts-ignore
-                theDiv.innerHTML += (prop + " : " + obj[prop] + "\n");
-            } else {
-                // @ts-ignore
-                theDiv.innerHTML += (prop + " : " + obj[prop] + "\n");
+                displayDiv.innerHTML += (prop + " : " + obj[prop] + "\n");
             }
         }
     }
 
-    sendHardcodedMessage() {
-        client.send(JSON.stringify({"action":"sendmessage", "data":"hello world"}));
-    }
-
-    sendCustomMessage() {
-        let customText: any;
+    handleSubmit() {
+        let customText: string;
         // @ts-ignore
         customText = document.getElementById('customTextField').value;
         client.send(JSON.stringify({"action":"sendmessage", "data":customText}));
     }
 
     render() {
+
         return (
             <div className="App">
-                <header className="App-header">
-                    <button onClick={this.sendHardcodedMessage}>
-                        Send hello world
-                    </button>
-                    <input type="text" id="customTextField" defaultValue={"Your text"}>
-                    </input>
-                    <button onClick={this.sendCustomMessage}>
-                        Send your custom text
-                    </button>
-                </header>
+                <form className="App-header" onSubmit={this.handleSubmit}>
+                    <input type="text" id="customTextField" defaultValue={"Your text"} />
+                    <input type="submit" value="Send your custom text" />
+                    <input type="text" value={this.state.data} readOnly />
+                    <input type="text" defaultValue="TimeStamp should go here" readOnly />
+                    <input type="text" defaultValue="Origin should go here" readOnly />
+                    <input type="text" defaultValue="IsTrusted should go here" readOnly />
+                </form>
                 <pre>
-                    <div id={"responseDisplay"}></div>
+                    <div id={"responseDisplay"} />
                 </pre>
             </div>
         );
@@ -70,3 +91,5 @@ class App extends Component {
 }
 
 export default App;
+
+//  <input type="text" value={this.state.data} readOnly />
