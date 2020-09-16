@@ -41,3 +41,4 @@ jobs:
           export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_NONPROD_ADMIN
           aws s3 rm s3://$DEST --recursive
           aws s3 sync $PWD/build s3://$DEST --content-encoding gzip
+          aws cloudfront create-invalidation --distribution-id EK7ZSZOOMXNVG  --paths "/*"
