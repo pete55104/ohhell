@@ -1,15 +1,14 @@
-const AWS = require('aws-sdk');
+import { ApiGatewayManagementApi, DynamoDB } from 'aws-sdk'
 
-const ddb = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: process.env.AWS_REGION });
+const ddb = new DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: process.env.AWS_REGION })
 
-exports.connectHandler = async event => {
+export async function connectHandler(event :any ) {
   const putParams = {
     TableName: process.env.TABLE_NAME,
     Item: {
       connectionId: event.requestContext.connectionId
     }
-  };
-
+  }
   try {
     await ddb.put(putParams).promise();
   } catch (err) {
@@ -19,7 +18,7 @@ exports.connectHandler = async event => {
   return { statusCode: 200, body: 'Connected.' };
 };
 
-exports.disconnectHandler = async event => {
+export async function disconnectHandler(event: any) {
     const deleteParams = {
       TableName: process.env.TABLE_NAME,
       Key: {
@@ -36,7 +35,7 @@ exports.disconnectHandler = async event => {
     return { statusCode: 200, body: 'Disconnected.' };
 };
 
-exports.defaultHandler = async event => {
+export async function defaultHandler(event: any){
     let connectionData;
     console.log(`defaultHandler entry with ${process.env.TABLE_NAME} and ddb client${!!ddb}`)
     try {
@@ -46,7 +45,7 @@ exports.defaultHandler = async event => {
         return { statusCode: 500, body: e.stack };
     }
     console.log('defaultHandler connectionData: ', JSON.stringify(connectionData))
-    const apigwManagementApi = new AWS.ApiGatewayManagementApi({
+    const apigwManagementApi = new ApiGatewayManagementApi({
         apiVersion: '2018-11-29',
         endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
     });
