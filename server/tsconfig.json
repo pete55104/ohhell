@@ -4,7 +4,10 @@
       "allowJs": false,
       "target": "es5",
       "noImplicitAny": true,
-      "strictNullChecks": true
+      "strictNullChecks": true,
+      "noImplicitThis": true,
+      "sourceMap": true,
+      "alwaysStrict": true
     },
     "include": ["./src/**/*"]
   }
