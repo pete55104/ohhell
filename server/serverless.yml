@@ -42,14 +42,14 @@ provider:
 
 functions:
   connectHandler:
-    handler: handlers.connectHandler
+    handler: built/handlers.connectHandler
     events:
       - websocket: $connect
   disconnectHandler:
-    handler: handlers.disconnectHandler
+    handler: built/handlers.disconnectHandler
     events:
       - websocket: $disconnect
   defaultHandler:
-    handler: handlers.defaultHandler
+    handler: built/handlers.defaultHandler
     events:
       - websocket: $default #simple event definition without extra route property

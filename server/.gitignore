@@ -10,6 +10,7 @@
 
 # production
 /build
+/built
 /.serverless
 
 # misc
