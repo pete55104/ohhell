@@ -1,8 +1,9 @@
+import { APIGatewayProxyHandler } from 'aws-lambda';
 import { ApiGatewayManagementApi, DynamoDB } from 'aws-sdk'
 
 const ddb = new DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: process.env.AWS_REGION })
 
-export async function connectHandler(event :any ) {
+export const connectHandler: APIGatewayProxyHandler = async (event) => {
   const putParams = {
     TableName: process.env.TABLE_NAME,
     Item: {
@@ -18,7 +19,7 @@ export async function connectHandler(event :any ) {
   return { statusCode: 200, body: 'Connected.' };
 };
 
-export async function disconnectHandler(event: any) {
+export const disconnectHandler: APIGatewayProxyHandler = async (event) => {
     const deleteParams = {
       TableName: process.env.TABLE_NAME,
       Key: {
@@ -35,7 +36,7 @@ export async function disconnectHandler(event: any) {
     return { statusCode: 200, body: 'Disconnected.' };
 };
 
-export async function defaultHandler(event: any){
+export const defaultHandler: APIGatewayProxyHandler = async (event) => {
     let connectionData;
     console.log(`defaultHandler entry with ${process.env.TABLE_NAME} and ddb client${!!ddb}`)
     try {
