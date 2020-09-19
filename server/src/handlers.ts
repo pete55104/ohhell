@@ -1,16 +1,8 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
 import { ApiGatewayManagementApi, DynamoDB } from 'aws-sdk'
+import config from './config'
 
 const ddb = new DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: process.env.AWS_REGION })
-
-const config = {
-  get tableName() {
-    if(!process.env.TABLE_NAME){
-      throw new Error("tablename is undefined")
-    }
-    return process.env.TABLE_NAME
-  }
-}
 
 export const connectHandler: APIGatewayProxyHandler = async (event) => {
   const putParams = {
