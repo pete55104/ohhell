@@ -3,9 +3,18 @@ import { ApiGatewayManagementApi, DynamoDB } from 'aws-sdk'
 
 const ddb = new DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: process.env.AWS_REGION })
 
+const config = {
+  get tableName() {
+    if(!process.env.TABLE_NAME){
+      throw new Error("tablename is undefined")
+    }
+    return process.env.TABLE_NAME
+  }
+}
+
 export const connectHandler: APIGatewayProxyHandler = async (event) => {
   const putParams = {
-    TableName: process.env.TABLE_NAME || "",
+    TableName: config.tableName,
     Item: {
       connectionId: event.requestContext.connectionId
     }
@@ -21,7 +30,7 @@ export const connectHandler: APIGatewayProxyHandler = async (event) => {
 
 export const disconnectHandler: APIGatewayProxyHandler = async (event) => {
     const deleteParams = {
-      TableName: process.env.TABLE_NAME || "",
+      TableName: config.tableName,
       Key: {
         connectionId: event.requestContext.connectionId
       }
@@ -40,7 +49,7 @@ export const defaultHandler: APIGatewayProxyHandler = async (event) => {
     let connectionData;
     console.log(`defaultHandler entry with ${process.env.TABLE_NAME} and ddb client${!!ddb}`)
     try {
-        connectionData = await ddb.scan({ TableName: process.env.TABLE_NAME || "", ProjectionExpression: 'connectionId' }).promise();
+        connectionData = await ddb.scan({ TableName: config.tableName, ProjectionExpression: 'connectionId' }).promise();
     } catch (e) {
         console.log(`defaultHandler error: ${JSON.stringify(e)}`)
         return { statusCode: 500, body: e.stack };
@@ -60,7 +69,7 @@ export const defaultHandler: APIGatewayProxyHandler = async (event) => {
         } catch (e) {
         if (e.statusCode === 410) {
             console.log(`Found stale connection, deleting ${connectionId}`);
-            await ddb.delete({ TableName: process.env.TABLE_NAME || "", Key: { connectionId } }).promise();
+            await ddb.delete({ TableName: config.tableName, Key: { connectionId } }).promise();
         } else {
             throw e;
         }
