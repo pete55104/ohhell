@@ -52,7 +52,7 @@ export const defaultHandler: APIGatewayProxyHandler = async (event) => {
         endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
     });
     
-    const postData = JSON.parse(event.body || "").data;
+    const postData = JSON.parse(event.body || "{}").data;
     console.log('defaultHandler postData: ', JSON.stringify(postData))
     const postCalls = (connectionData.Items || []).map(async ({ connectionId }) => {
         try {
