@@ -6,6 +6,10 @@
     "deploy": "./scripts/deploy.sh"
   },
   "devDependencies": {
-    "serverless": "^1.79.0"
+    "serverless": "^1.79.0",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.62"
   }
 }

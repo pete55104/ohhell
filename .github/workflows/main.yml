@@ -6,7 +6,7 @@ name: CI
 # events but only for the master branch
 on:
   push:
-    branches: [ master, OH009-deploy-ui-with-aws-s3 ]
+    branches: [ master ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -26,6 +26,8 @@ jobs:
           yarn -v
           cd server
           yarn
+          echo building for typescript
+          yarn tsc
           echo attempting deploy using $AWS_ACCESS_KEY_ID_NONPROD_ADMIN
           yarn deploy
       - name: deploy UI

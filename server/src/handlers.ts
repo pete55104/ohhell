@@ -1,15 +1,16 @@
-const AWS = require('aws-sdk');
+import { APIGatewayProxyHandler } from 'aws-lambda';
+import { ApiGatewayManagementApi, DynamoDB } from 'aws-sdk'
+import config from './config'
 
-const ddb = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: process.env.AWS_REGION });
+const ddb = new DynamoDB.DocumentClient({ apiVersion: '2012-08-10', region: process.env.AWS_REGION })
 
-exports.connectHandler = async event => {
+export const connectHandler: APIGatewayProxyHandler = async (event) => {
   const putParams = {
-    TableName: process.env.TABLE_NAME,
+    TableName: config.tableName,
     Item: {
       connectionId: event.requestContext.connectionId
     }
-  };
-
+  }
   try {
     await ddb.put(putParams).promise();
   } catch (err) {
@@ -19,9 +20,9 @@ exports.connectHandler = async event => {
   return { statusCode: 200, body: 'Connected.' };
 };
 
-exports.disconnectHandler = async event => {
+export const disconnectHandler: APIGatewayProxyHandler = async (event) => {
     const deleteParams = {
-      TableName: process.env.TABLE_NAME,
+      TableName: config.tableName,
       Key: {
         connectionId: event.requestContext.connectionId
       }
@@ -36,31 +37,31 @@ exports.disconnectHandler = async event => {
     return { statusCode: 200, body: 'Disconnected.' };
 };
 
-exports.defaultHandler = async event => {
+export const defaultHandler: APIGatewayProxyHandler = async (event) => {
     let connectionData;
     console.log(`defaultHandler entry with ${process.env.TABLE_NAME} and ddb client${!!ddb}`)
     try {
-        connectionData = await ddb.scan({ TableName: process.env.TABLE_NAME, ProjectionExpression: 'connectionId' }).promise();
+        connectionData = await ddb.scan({ TableName: config.tableName, ProjectionExpression: 'connectionId' }).promise();
     } catch (e) {
         console.log(`defaultHandler error: ${JSON.stringify(e)}`)
         return { statusCode: 500, body: e.stack };
     }
     console.log('defaultHandler connectionData: ', JSON.stringify(connectionData))
-    const apigwManagementApi = new AWS.ApiGatewayManagementApi({
+    const apigwManagementApi = new ApiGatewayManagementApi({
         apiVersion: '2018-11-29',
         endpoint: event.requestContext.domainName + '/' + event.requestContext.stage
     });
     
-    const postData = JSON.parse(event.body).data;
+    const postData = JSON.parse(event.body || "{}").data;
     console.log('defaultHandler postData: ', JSON.stringify(postData))
-    const postCalls = connectionData.Items.map(async ({ connectionId }) => {
+    const postCalls = (connectionData.Items || []).map(async ({ connectionId }) => {
         try {
         await apigwManagementApi.postToConnection({ ConnectionId: connectionId, Data: postData }).promise();
         console.log('defaultHandler: postedToConnection')
         } catch (e) {
         if (e.statusCode === 410) {
             console.log(`Found stale connection, deleting ${connectionId}`);
-            await ddb.delete({ TableName: process.env.TABLE_NAME, Key: { connectionId } }).promise();
+            await ddb.delete({ TableName: config.tableName, Key: { connectionId } }).promise();
         } else {
             throw e;
         }
