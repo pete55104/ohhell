@@ -41,7 +41,10 @@ export const defaultHandler: APIGatewayProxyHandler = async (event) => {
     let connectionData;
     console.log(`defaultHandler entry with ${process.env.TABLE_NAME} and ddb client${!!ddb}`)
     try {
-        connectionData = await ddb.scan({ TableName: config.tableName, ProjectionExpression: 'connectionId' }).promise();
+        const before = Date.now()
+        connectionData = await ddb.scan({ TableName: config.tableName, ProjectionExpression: 'connectionId' }).promise()
+        const after = Date.now()
+        console.log(`pulled connection info from dynamo in ${after - before}`)
     } catch (e) {
         console.log(`defaultHandler error: ${JSON.stringify(e)}`)
         return { statusCode: 500, body: e.stack };
