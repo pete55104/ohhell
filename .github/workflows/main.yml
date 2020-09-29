@@ -7,8 +7,6 @@ name: CI
 on:
   push:
     branches: [ master ]
-  pull_request:
-    branches: [ master ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -19,15 +17,30 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
-
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
+      - name: deploy API
+        env:
+          AWS_ACCESS_KEY_ID_NONPROD_ADMIN: ${{ secrets.AWS_ACCESS_KEY_ID_NONPROD_ADMIN }}
+          AWS_SECRET_ACCESS_KEY_NONPROD_ADMIN: ${{ secrets.AWS_SECRET_ACCESS_KEY_NONPROD_ADMIN }}
         run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+          yarn -v
+          cd server
+          yarn
+          echo building for typescript
+          yarn tsc
+          echo attempting deploy using $AWS_ACCESS_KEY_ID_NONPROD_ADMIN
+          yarn deploy
+      - name: deploy UI
+        env:
+          AWS_ACCESS_KEY_ID_NONPROD_ADMIN: ${{ secrets.AWS_ACCESS_KEY_ID_NONPROD_ADMIN }}
+          AWS_SECRET_ACCESS_KEY_NONPROD_ADMIN: ${{ secrets.AWS_SECRET_ACCESS_KEY_NONPROD_ADMIN }}
+          DEST: ohell-ui-dev
+        run: |
+          cd client
+          yarn
+          yarn build
+          export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_NONPROD_ADMIN
+          export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_NONPROD_ADMIN
+          aws s3 rm s3://$DEST --recursive
+          aws s3 sync $PWD/build s3://$DEST
+          aws cloudfront create-invalidation --distribution-id EK7ZSZOOMXNVG  --paths "/*"
