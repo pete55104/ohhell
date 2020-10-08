@@ -1,10 +1,6 @@
 import React, {Component } from 'react'
 
 class Nothing extends Component<{}, {}> {
-    constructor(props: any) {
-        super(props);
-    }
-
     render() {
         return (
           <div>

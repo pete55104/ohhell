@@ -6,9 +6,6 @@ interface SampleProps extends RouteComponentProps {
 } 
 
 class Sample extends Component<SampleProps, {}> {
-    constructor(props: any) {
-        super(props);
-    }
 
     render() {
         console.log(this.props);

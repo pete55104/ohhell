@@ -1,5 +1,5 @@
 import React, {Component, FormEvent} from 'react';
-import '../App.css';
+import '../styles/App.scss';
 import {w3cwebsocket as W3CWebSocket} from "websocket";
 
 const url = 'wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev';
@@ -81,7 +81,7 @@ class Echo extends Component<{}, ICustomAppState> {
         if (this.state.isTrusted && this.state.timeStampReceived && this.state.timeStampSent) {
             return (
                 <div className="Echo">
-                    <form className="App-header" onSubmit={this.handleSubmit}>
+                    <form className="Echo-header" onSubmit={this.handleSubmit}>
                         <input type="text" id="customTextField" defaultValue={"Your text"} />
                         <input type="submit" value="Send your custom text" />
                         <label>
