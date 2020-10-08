@@ -6,7 +6,7 @@ name: CI
 # events but only for the master branch
 on:
   push:
-    branches: [ master ]
+    branches: [ master, OH019-add-first-route-and-buttons-sleeping-bear ]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
