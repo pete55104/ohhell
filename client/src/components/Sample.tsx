@@ -1,5 +1,5 @@
 import React, {Component } from 'react'
-import { RouteComponentProps } from 'react-router-dom';
+import { NavLink, RouteComponentProps } from 'react-router-dom';
 
 interface SampleProps extends RouteComponentProps {
     sampleProp: string
@@ -9,13 +9,13 @@ class Sample extends Component<SampleProps, {}> {
 
     render() {
         console.log(this.props);
-        const redirect = () => {
-          this.props.history.push("/");
-        };
         return (
+        <div className="centeringdiv">
+            <h1>sample</h1>
           <div>
-            This is the {this.props.sampleProp} component route
-            <button onClick={redirect}>Redirect to /</button>
+            <span>This is the {this.props.sampleProp} component route</span>
+            <NavLink activeClassName="active" exact to="/">Redirect to /</NavLink>
+          </div>
           </div>
         );
     }

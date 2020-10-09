@@ -18,10 +18,10 @@ class Echo extends Component<{}, ICustomAppState> {
     constructor(props: any) {
         super(props);
         this.state = {
-            data: props.data || "defaultName",
-            timeStampSent: 12344,
-            timeStampReceived: props.timeStampReceived || 12345,
-            origin: props.origin ||  "somewhereCool.6789",
+            data: props.data || "",
+            timeStampSent: 0,
+            timeStampReceived: props.timeStampReceived || 0,
+            origin: props.origin ||  "",
             isTrusted: props.isTrusted || true
         };
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -78,42 +78,47 @@ class Echo extends Component<{}, ICustomAppState> {
     }
 
     render() {
-        if (this.state.isTrusted && this.state.timeStampReceived && this.state.timeStampSent) {
+        if (this.state.isTrusted) {// && this.state.timeStampReceived && this.state.timeStampSent) {
             return (
+                <div><h1>you can make a websocket echo here</h1>
                 <div className="Echo">
                     <form className="Echo-form" onSubmit={this.handleSubmit}>
-                        <input type="text" id="customTextField" defaultValue={"Your text"} />
-                        <input type="submit" value="send your custom text" />
-                        <label>
-                            data
+                        <ul>
+                            <li><input type="text" id="customTextField" defaultValue={"Your text"} /><input type="submit" value="send your custom text" /></li>
+                        <li>
+                            <label htmlFor="data">data</label>
                             <input type="text" id="data" value={this.state.data} readOnly />
-                        </label>
-                        <label>
-                            time sent
-                            <input type="text" value={this.state.timeStampSent} readOnly />
-                        </label>
-                        <label>
-                            time received
-                            <input type="text" value={this.state.timeStampReceived} readOnly />
-                        </label>
-                        <label>
-                            response time
-                            <input type="text" value={
-                                this.state.timeStampReceived - this.state.timeStampSent
+                        </li>
+                        <li>
+                            <label htmlFor="timeStampSent">time sent</label>
+                            <input type="text" id="timeStampSent" value={this.state.timeStampSent} readOnly />
+                            
+                        </li>
+                        <li>
+                            <label htmlFor="timeStampReceived">time received</label>
+                            <input type="text" id="timeStampReceived" value={this.state.timeStampReceived} readOnly />
+                        </li>
+                        <li>
+                            <label htmlFor="responseTime">response time</label>
+                            <input type="text" id="responseTime" value={
+                                (this.state.timeStampReceived || 0) - (this.state.timeStampSent || 0)
                             } readOnly />
-                        </label>
-                        <label>
-                            origin url
-                            <input type="text" value={this.state.origin} readOnly />
-                        </label>
-                        <label>
-                            istrusted
-                            <input type="text" value={this.state.isTrusted.toString()} readOnly />
-                        </label>
+                        </li>
+                        <li>
+                            <label htmlFor="origin">origin url</label>
+                            <input type="text" id="origin" value={this.state.origin} readOnly />
+                            
+                        </li>
+                        <li>
+                            <label htmlFor="isTrusted">istrusted</label>
+                            <input type="text" id="isTrusted" value={this.state.isTrusted.toString()} readOnly />
+                        </li>
+                        </ul>
                     </form>
                     <pre>
-                        <div id={"responseDisplay"} />
+                        <div className="echo-response-display" id={"responseDisplay"} />
                     </pre>
+                </div>
                 </div>
             );
         } else {

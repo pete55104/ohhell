@@ -30,19 +30,36 @@ h1 {
   margin-bottom: 20px;
 }
 
+.centeringdiv {
+  text-align: center;
+}
+
 .Echo-form {
-  width: 300px;
-  align-content: center;
-  display: flex;
-  flex-direction: column;
-  align-items: right;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  text-align: center;
+  ul {
+    padding-left: 0;
+    display: inline-block;
+    max-width: 26em;
+  }
+  li {
+    align-items: left;
+    list-style-type: none;
+    max-width: 26em
+  }
   label {
+    display:inline-block;
     text-align: right;
     font-size: 12pt;
-    input {
-      margin-left: 3px;
-    }
+    width: 10em;
   }
+  input {
+    display:inline-block;
+    margin-left: 3px;
+    width: 15em;
+  }
+}
+
+.echo-response-display {
+  display: inline-block;
+  margin-left: 3em;
 }
