@@ -70,6 +70,8 @@ class Echo extends Component<{}, ICustomAppState> {
         let customText: string;
         //@ts-ignore
         customText = document.getElementById('customTextField').value;
+        //@ts-ignore
+        document.getElementById('customTextField').value = "";
         console.log(`custom text is: ${customText}`);
         client.send(JSON.stringify({"action":"sendmessage", "data":customText}));
         let timeOfSend = Date.now();
@@ -84,7 +86,8 @@ class Echo extends Component<{}, ICustomAppState> {
                 <div className="Echo">
                     <form className="Echo-form" onSubmit={this.handleSubmit}>
                         <ul>
-                            <li><input type="text" id="customTextField" defaultValue={"Your text"} /><input type="submit" value="send your custom text" /></li>
+                            <li><input type="text" id="customTextField" defaultValue={"Your text"} />
+                            <input type="submit" value="send your custom text" /></li>
                         <li>
                             <label htmlFor="data">data</label>
                             <input type="text" id="data" value={this.state.data} readOnly />
