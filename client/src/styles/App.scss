@@ -30,13 +30,19 @@ h1 {
   margin-bottom: 20px;
 }
 
-.Echo-header {
-  background-color: #282c34;
-  /*min-height: 100vh;*/
+.Echo-form {
+  width: 300px;
+  align-content: center;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: right;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  label {
+    text-align: right;
+    font-size: 12pt;
+    input {
+      margin-left: 3px;
+    }
+  }
 }

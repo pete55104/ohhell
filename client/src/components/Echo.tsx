@@ -81,33 +81,33 @@ class Echo extends Component<{}, ICustomAppState> {
         if (this.state.isTrusted && this.state.timeStampReceived && this.state.timeStampSent) {
             return (
                 <div className="Echo">
-                    <form className="Echo-header" onSubmit={this.handleSubmit}>
+                    <form className="Echo-form" onSubmit={this.handleSubmit}>
                         <input type="text" id="customTextField" defaultValue={"Your text"} />
-                        <input type="submit" value="Send your custom text" />
+                        <input type="submit" value="send your custom text" />
                         <label>
-                            Data:
+                            data
                             <input type="text" id="data" value={this.state.data} readOnly />
                         </label>
                         <label>
-                            Time Sent:
+                            time sent
                             <input type="text" value={this.state.timeStampSent} readOnly />
                         </label>
                         <label>
-                            Time Received:
+                            time received
                             <input type="text" value={this.state.timeStampReceived} readOnly />
                         </label>
                         <label>
-                            Response Time:
+                            response time
                             <input type="text" value={
                                 this.state.timeStampReceived - this.state.timeStampSent
                             } readOnly />
                         </label>
                         <label>
-                            Origin URL:
+                            origin url
                             <input type="text" value={this.state.origin} readOnly />
                         </label>
                         <label>
-                            IsTrusted?:
+                            istrusted
                             <input type="text" value={this.state.isTrusted.toString()} readOnly />
                         </label>
                     </form>
