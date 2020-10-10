@@ -1,6 +1,7 @@
 import React, {Component, FormEvent} from 'react';
 import '../styles/App.scss';
 import {w3cwebsocket as W3CWebSocket} from "websocket";
+import { Redirect } from 'react-router-dom';
 
 const url = 'wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev';
 const client = new W3CWebSocket(url);
@@ -11,6 +12,7 @@ export interface ICustomAppState {
     timeStampReceived?: number;
     origin?: string;
     isTrusted?: boolean;
+    bearHasBeenPoked: boolean;
 }
 
 class Echo extends Component<{}, ICustomAppState> {
@@ -22,7 +24,8 @@ class Echo extends Component<{}, ICustomAppState> {
             timeStampSent: 0,
             timeStampReceived: props.timeStampReceived || 0,
             origin: props.origin ||  "",
-            isTrusted: props.isTrusted || true
+            isTrusted: props.isTrusted || true,
+            bearHasBeenPoked: false
         };
         this.handleSubmit = this.handleSubmit.bind(this);
     }
@@ -44,7 +47,11 @@ class Echo extends Component<{}, ICustomAppState> {
                 // @ts-ignore
                 origin: message.origin,
                 // @ts-ignore
-                isTrusted: message.isTrusted
+                isTrusted: message.isTrusted,
+                bearHasBeenPoked: false
+            }
+            if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
+                newState.bearHasBeenPoked = true
             }
             this.setState(newState);
             console.log(this.state.data);
@@ -121,6 +128,7 @@ class Echo extends Component<{}, ICustomAppState> {
                     <pre>
                         <div className="echo-response-display" id={"responseDisplay"} />
                     </pre>
+                    {this.state.bearHasBeenPoked && <Redirect push to="/satiated-bear" />}
                 </div>
                 </div>
             );

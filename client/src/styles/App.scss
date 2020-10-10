@@ -1,6 +1,19 @@
 .Baseline {
   text-align: left;
   background-color: lightgray;
+  color: black;
+}
+
+.darkmode {
+  background-color: black;
+  color: lightgray;
+  a {
+    color: lightgray;
+    :active {
+      color: lightgray;
+    }
+    border-style: none;
+  }
 }
 
 a {
