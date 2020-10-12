@@ -1,4 +1,4 @@
-import React, {ChangeEvent, Component, FormEvent} from 'react';
+import React, {ChangeEvent, FC, FormEvent, useEffect, useRef, useState} from 'react';
 import '../styles/App.scss';
 import {w3cwebsocket as W3CWebSocket} from "websocket";
 import { Redirect } from 'react-router-dom';
@@ -6,7 +6,7 @@ import { Redirect } from 'react-router-dom';
 const url = 'wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev';
 const client = new W3CWebSocket(url);
 
-export interface ICustomAppState {
+interface IMessageState {
     data?: string;
     timeStampSent?: number;
     timeStampReceived?: number;
@@ -16,33 +16,33 @@ export interface ICustomAppState {
     enteredText: string;
 }
 
-class Echo extends Component<{}, ICustomAppState> {
+const Echo: FC<{}> = () => {
+    const intial: IMessageState = {
+        data: "",
+        timeStampSent: 0,
+        timeStampReceived: 0,
+        origin: "",
+        isTrusted: true,
+        bearHasBeenPoked: false,
+        enteredText: ""
+    };
+    const textEntryField = useRef<HTMLInputElement>(null)
+    const [messageState, setMessageState] = useState(intial)
 
-    constructor(props: any) {
-        super(props);
-        this.state = {
-            data: props.data || "",
-            timeStampSent: 0,
-            timeStampReceived: props.timeStampReceived || 0,
-            origin: props.origin ||  "",
-            isTrusted: props.isTrusted || true,
-            bearHasBeenPoked: false,
-            enteredText: ""
-        };
-        this.handleSubmit = this.handleSubmit.bind(this);
-        this.handleInputChange = this.handleInputChange.bind(this);
-    }
+    useEffect(() => {
+        textEntryField?.current?.focus()
+    },[])
 
-    componentDidMount() {
+    useEffect(() => {
         client.onopen = () => {
             console.log('WebSocket Client Connected:');
             console.log(client);
         };
         client.onmessage = (message) => {
             console.log(message);
-            this.writeMessageToScreen(message);
-            const newState: ICustomAppState = {
-                ...this.state,
+            writeMessageToScreen(message);
+            const newState: IMessageState = {
+                ...messageState,
                 data: message.data.toString() || "",
                 timeStampReceived: Date.now(),
                 // @ts-ignore
@@ -53,15 +53,15 @@ class Echo extends Component<{}, ICustomAppState> {
             if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
                 newState.bearHasBeenPoked = true
             }
-            this.setState(newState);
-            console.log(this.state.data);
-            console.log(this.state.isTrusted);
-            console.log(this.state.timeStampReceived);
-            console.log(this.state.origin);
+            setMessageState(newState);
+            console.log(messageState.data);
+            console.log(messageState.isTrusted);
+            console.log(messageState.timeStampReceived);
+            console.log(messageState.origin);
         };
-    }
+    })
 
-    writeMessageToScreen(obj: Object) {
+    const writeMessageToScreen = (obj: Object) => {
         let displayDiv = document.getElementById("responseDisplay");
         if (displayDiv){
             displayDiv.innerHTML = "";
@@ -72,67 +72,65 @@ class Echo extends Component<{}, ICustomAppState> {
         }
     }
 
-    handleSubmit(e:  FormEvent<HTMLFormElement>) {
+    const handleSubmit = (e:  FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        client.send(JSON.stringify({"action":"sendmessage", "data": this.state.enteredText}));
+        client.send(JSON.stringify({"action":"sendmessage", "data": messageState.enteredText}));
         let timeOfSend = Date.now();
-        this.setState({timeStampSent : timeOfSend} );
+        setMessageState({...messageState, timeStampSent: timeOfSend, enteredText: ""});
+
         console.log(`sending message at time: ${timeOfSend}`);
     }
 
-    handleInputChange(event: ChangeEvent<HTMLInputElement>){
-        this.setState({enteredText: event.target.value});
+    const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+        setMessageState({...messageState, enteredText: event.target.value});
     }
 
-    render() {
-        if (this.state.isTrusted) {
-            return (
-                <div><h1>you can make a websocket echo here</h1>
-                <div className="Echo">
-                    <form className="Echo-form" onSubmit={this.handleSubmit}>
-                        <ul>
-                            <li><input type="text" id="customTextField"  value={this.state.enteredText} onChange={this.handleInputChange} />
-                            <input type="submit" value="send your custom text" /></li>
-                        <li>
-                            <label htmlFor="data">data</label>
-                            <input type="text" id="data" value={this.state.data} readOnly />
-                        </li>
-                        <li>
-                            <label htmlFor="timeStampSent">time sent</label>
-                            <input type="text" id="timeStampSent" value={this.state.timeStampSent} readOnly />
-                            
-                        </li>
-                        <li>
-                            <label htmlFor="timeStampReceived">time received</label>
-                            <input type="text" id="timeStampReceived" value={this.state.timeStampReceived} readOnly />
-                        </li>
-                        <li>
-                            <label htmlFor="responseTime">response time</label>
-                            <input type="text" id="responseTime" value={
-                                (this.state.timeStampReceived || 0) - (this.state.timeStampSent || 0)
-                            } readOnly />
-                        </li>
-                        <li>
-                            <label htmlFor="origin">origin url</label>
-                            <input type="text" id="origin" value={this.state.origin} readOnly />
-                            
-                        </li>
-                        <li>
-                            <label htmlFor="isTrusted">istrusted</label>
-                            <input type="text" id="isTrusted" value={this.state.isTrusted.toString()} readOnly />
-                        </li>
-                        </ul>
-                    </form>
-                    <pre>
-                        <div className="echo-response-display" id={"responseDisplay"} />
-                    </pre>
-                    {this.state.bearHasBeenPoked && <Redirect push to="/satiated-bear" />}
-                </div>
-                </div>
-            );
-        } else {
-            return null;
-        }
+    if (messageState.isTrusted) {
+        return (
+            <div><h1>you can make a websocket echo here</h1>
+            <div className="Echo">
+                <form className="Echo-form" onSubmit={handleSubmit}>
+                    <ul>
+                        <li><input type="text" id="customTextField"  value={messageState.enteredText} onChange={handleInputChange} ref={textEntryField} />
+                        <input type="submit" value="send your custom text" /></li>
+                    <li>
+                        <label htmlFor="data">data</label>
+                        <input type="text" id="data" value={messageState.data} readOnly />
+                    </li>
+                    <li>
+                        <label htmlFor="timeStampSent">time sent</label>
+                        <input type="text" id="timeStampSent" value={messageState.timeStampSent} readOnly />
+                        
+                    </li>
+                    <li>
+                        <label htmlFor="timeStampReceived">time received</label>
+                        <input type="text" id="timeStampReceived" value={messageState.timeStampReceived} readOnly />
+                    </li>
+                    <li>
+                        <label htmlFor="responseTime">response time</label>
+                        <input type="text" id="responseTime" value={
+                            (messageState.timeStampReceived || 0) - (messageState.timeStampSent || 0)
+                        } readOnly />
+                    </li>
+                    <li>
+                        <label htmlFor="origin">origin url</label>
+                        <input type="text" id="origin" value={messageState.origin} readOnly />
+                    </li>
+                    <li>
+                        <label htmlFor="isTrusted">istrusted</label>
+                        <input type="text" id="isTrusted" value={messageState.isTrusted.toString()} readOnly />
+                    </li>
+                    </ul>
+                </form>
+                <pre>
+                    <div className="echo-response-display" id={"responseDisplay"} />
+                </pre>
+                {messageState.bearHasBeenPoked && <Redirect push to="/satiated-bear" />}
+            </div>
+            </div>
+        );
+    } else {
+        return null;
     }
 }
 

@@ -6,10 +6,6 @@ interface IProps extends RouteComponentProps {
     initialColor: string
 } 
 
-interface IState{
-
-}
-
 const Sample: FC<IProps> = props => {
     const [color, setColor] = useState(props.initialColor);
     const [truthiness, setTruthiness] = useState(true);
