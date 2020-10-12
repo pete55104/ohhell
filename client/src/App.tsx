@@ -1,124 +1,35 @@
-import React, {Component, FormEvent} from 'react';
-import './App.css';
-import {w3cwebsocket as W3CWebSocket} from "websocket";
+import React, {Component} from 'react'
+import { Route, Switch, Redirect, NavLink } from "react-router-dom"
+import './styles/App.scss'
+import Echo from "./components/Echo"
+import Lobby from "./components/Lobby"
+import SleepingBear from "./components/SleepingBear"
+import SatiatedBear from "./components/SatiatedBear"
+import Sample from "./components/Sample"
+import Nothing from "./components/Nothing"
 
-const url = 'wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev';
-const client = new W3CWebSocket(url);
-
-export interface ICustomAppState {
-    data?: string;
-    timeStampSent?: number;
-    timeStampReceived?: number;
-    origin?: string;
-    isTrusted?: boolean;
-}
-
-class App extends Component<{}, ICustomAppState> {
-
-    constructor(props: any) {
-        super(props);
-        this.state = {
-            data: props.data || "defaultName",
-            timeStampSent: 12344,
-            timeStampReceived: props.timeStampReceived || 12345,
-            origin: props.origin ||  "somewhereCool.6789",
-            isTrusted: props.isTrusted || true
-        };
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
-
-    componentDidMount() {
-        client.onopen = () => {
-            console.log('WebSocket Client Connected:');
-            console.log(client);
-        };
-        client.onmessage = (message) => {
-            console.log(message);
-            this.writeMessageToScreen(message);
-            const newState: ICustomAppState = {
-                data: message.data.toString() || "",
-
-                timeStampReceived: Date.now(),
-                //timeStampReceived: message.timeStamp,
-
-                // @ts-ignore
-                origin: message.origin,
-                // @ts-ignore
-                isTrusted: message.isTrusted
-            }
-            this.setState(newState);
-            console.log(this.state.data);
-            console.log(this.state.isTrusted);
-            console.log(this.state.timeStampReceived);
-            console.log(this.state.origin);
-        };
-    }
-
-    writeMessageToScreen(obj: Object) {
-        let displayDiv = document.getElementById("responseDisplay");
-        if (displayDiv){
-            displayDiv.innerHTML = "";
-            for (let prop in obj) {
-                //@ts-ignore
-                displayDiv.innerHTML += (prop + " : " + obj[prop] + "\n");
-            }
-        }
-    }
-
-    handleSubmit(e:  FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        let customText: string;
-        //@ts-ignore
-        customText = document.getElementById('customTextField').value;
-        console.log(`custom text is: ${customText}`);
-        client.send(JSON.stringify({"action":"sendmessage", "data":customText}));
-        let timeOfSend = Date.now();
-        this.setState({timeStampSent : timeOfSend} );
-        console.log(`sending message at time: ${timeOfSend}`);
-    }
-
+class App extends Component<{}, {}> {
     render() {
-        if (this.state.isTrusted && this.state.timeStampReceived && this.state.timeStampSent) {
-            return (
-                <div className="App">
-                    <form className="App-header" onSubmit={this.handleSubmit}>
-                        <input type="text" id="customTextField" defaultValue={"Your text"} />
-                        <input type="submit" value="Send your custom text" />
-                        <label>
-                            Data:
-                            <input type="text" id="data" value={this.state.data} readOnly />
-                        </label>
-                        <label>
-                            Time Sent:
-                            <input type="text" value={this.state.timeStampSent} readOnly />
-                        </label>
-                        <label>
-                            Time Received:
-                            <input type="text" value={this.state.timeStampReceived} readOnly />
-                        </label>
-                        <label>
-                            Response Time:
-                            <input type="text" value={
-                                this.state.timeStampReceived - this.state.timeStampSent
-                            } readOnly />
-                        </label>
-                        <label>
-                            Origin URL:
-                            <input type="text" value={this.state.origin} readOnly />
-                        </label>
-                        <label>
-                            IsTrusted?:
-                            <input type="text" value={this.state.isTrusted.toString()} readOnly />
-                        </label>
-                    </form>
-                    <pre>
-                        <div id={"responseDisplay"} />
-                    </pre>
-                </div>
-            );
-        } else {
-            return null;
-        }
+        return (
+        <div className="App">
+            <div className="top-menu">
+                <NavLink activeClassName="active" exact to="/">lobby</NavLink>
+                <NavLink activeClassName="active" to="/sample">sample</NavLink>
+                <NavLink activeClassName="active" to="/nowhere">nowhere</NavLink>
+                <NavLink activeClassName="active" to="/sleeping-bear">a sleeping bear</NavLink>
+                <NavLink activeClassName="active" to="/echo">echo</NavLink>
+            </div>
+            <Switch>
+                <Route path="/" exact component={Lobby} />
+                <Route path="/echo" component={Echo} />
+                <Route path="/sample" render={routerProps => <Sample {...routerProps} sampleProp={"sample"}/>} />
+                <Route path="/sleeping-bear" component={SleepingBear} />
+                <Route path="/satiated-bear" component={SatiatedBear} />
+                <Route path='/default' render={() => <Redirect to= "/" />} />
+                <Route component={Nothing} />
+            </Switch>
+        </div>
+        )
     }
 }
 
