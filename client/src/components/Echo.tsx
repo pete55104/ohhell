@@ -1,4 +1,4 @@
-import React, {Component, FormEvent} from 'react';
+import React, {ChangeEvent, Component, FormEvent} from 'react';
 import '../styles/App.scss';
 import {w3cwebsocket as W3CWebSocket} from "websocket";
 import { Redirect } from 'react-router-dom';
@@ -13,6 +13,7 @@ export interface ICustomAppState {
     origin?: string;
     isTrusted?: boolean;
     bearHasBeenPoked: boolean;
+    enteredText: string;
 }
 
 class Echo extends Component<{}, ICustomAppState> {
@@ -25,9 +26,11 @@ class Echo extends Component<{}, ICustomAppState> {
             timeStampReceived: props.timeStampReceived || 0,
             origin: props.origin ||  "",
             isTrusted: props.isTrusted || true,
-            bearHasBeenPoked: false
+            bearHasBeenPoked: false,
+            enteredText: ""
         };
         this.handleSubmit = this.handleSubmit.bind(this);
+        this.handleInputChange = this.handleInputChange.bind(this);
     }
 
     componentDidMount() {
@@ -39,16 +42,13 @@ class Echo extends Component<{}, ICustomAppState> {
             console.log(message);
             this.writeMessageToScreen(message);
             const newState: ICustomAppState = {
+                ...this.state,
                 data: message.data.toString() || "",
-
                 timeStampReceived: Date.now(),
-                //timeStampReceived: message.timeStamp,
-
                 // @ts-ignore
                 origin: message.origin,
                 // @ts-ignore
-                isTrusted: message.isTrusted,
-                bearHasBeenPoked: false
+                isTrusted: message.isTrusted
             }
             if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
                 newState.bearHasBeenPoked = true
@@ -74,26 +74,24 @@ class Echo extends Component<{}, ICustomAppState> {
 
     handleSubmit(e:  FormEvent<HTMLFormElement>) {
         e.preventDefault();
-        let customText: string;
-        //@ts-ignore
-        customText = document.getElementById('customTextField').value;
-        //@ts-ignore
-        document.getElementById('customTextField').value = "";
-        console.log(`custom text is: ${customText}`);
-        client.send(JSON.stringify({"action":"sendmessage", "data":customText}));
+        client.send(JSON.stringify({"action":"sendmessage", "data": this.state.enteredText}));
         let timeOfSend = Date.now();
         this.setState({timeStampSent : timeOfSend} );
         console.log(`sending message at time: ${timeOfSend}`);
     }
 
+    handleInputChange(event: ChangeEvent<HTMLInputElement>){
+        this.setState({enteredText: event.target.value});
+    }
+
     render() {
-        if (this.state.isTrusted) {// && this.state.timeStampReceived && this.state.timeStampSent) {
+        if (this.state.isTrusted) {
             return (
                 <div><h1>you can make a websocket echo here</h1>
                 <div className="Echo">
                     <form className="Echo-form" onSubmit={this.handleSubmit}>
                         <ul>
-                            <li><input type="text" id="customTextField" defaultValue={"Your text"} />
+                            <li><input type="text" id="customTextField"  value={this.state.enteredText} onChange={this.handleInputChange} />
                             <input type="submit" value="send your custom text" /></li>
                         <li>
                             <label htmlFor="data">data</label>

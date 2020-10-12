@@ -12,7 +12,7 @@ class App extends Component<{}, {}> {
     render() {
         return (
         <div className="App">
-            <div className="link-container top-menu">
+            <div className="top-menu">
                 <NavLink activeClassName="active" exact to="/">lobby</NavLink>
                 <NavLink activeClassName="active" to="/sample">sample</NavLink>
                 <NavLink activeClassName="active" to="/nowhere">nowhere</NavLink>
