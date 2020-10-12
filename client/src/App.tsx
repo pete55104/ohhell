@@ -22,7 +22,7 @@ class App extends Component<{}, {}> {
             <Switch>
                 <Route path="/" exact component={Lobby} />
                 <Route path="/echo" component={Echo} />
-                <Route path="/sample" render={routerProps => <Sample {...routerProps} sampleProp={"sample"}/>} />
+                <Route path="/sample" render={routerProps => <Sample {...routerProps} sampleProp={"sample"} initialColor={"blue"}/>} />
                 <Route path="/sleeping-bear" component={SleepingBear} />
                 <Route path="/satiated-bear" component={SatiatedBear} />
                 <Route path='/default' render={() => <Redirect to= "/" />} />

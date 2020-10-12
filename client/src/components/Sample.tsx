@@ -2,7 +2,8 @@ import React, { FC, ChangeEvent, useState } from 'react'
 import { NavLink, RouteComponentProps } from 'react-router-dom';
 
 interface IProps extends RouteComponentProps {
-    sampleProp: string
+    sampleProp: string,
+    initialColor: string
 } 
 
 interface IState{
@@ -10,7 +11,7 @@ interface IState{
 }
 
 const Sample: FC<IProps> = props => {
-    const [color, setColor] = useState("red");
+    const [color, setColor] = useState(props.initialColor);
     const [truthiness, setTruthiness] = useState(true);
 
     const toggleTruthiness = () => {
