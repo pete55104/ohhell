@@ -1,24 +1,22 @@
-import React, {Component } from 'react'
+import React, {FC, useEffect } from 'react'
 import { NavLink } from 'react-router-dom';
 
-class SatiatedBear extends Component<{}, {}> {
-    componentWillMount() {
+const SatiatedBear: FC<{}> = () => {
+    useEffect(() => {
       document.body.style.backgroundColor = "black";
-    } 
-
-    componentWillUnmount() {
+      return () => {
         document.body.style.backgroundColor = "lightgray";
-    }
-    render() {
-        return (
-        <div className="centeringdiv darkmode">
-            <h1>you have been eaten by a bear</h1>
-          <div>
-            <NavLink activeClassName="active" exact to="/">out</NavLink>
-          </div>
-          </div>
-        );
-    }
+      }
+    })
+
+    return (
+    <div className="centeringdiv darkmode">
+        <h1>you have been eaten by a bear</h1>
+      <div>
+        <NavLink activeClassName="active" exact to="/">out</NavLink>
+      </div>
+      </div>
+    );
 }
 
 export default SatiatedBear;
