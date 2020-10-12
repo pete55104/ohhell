@@ -1,8 +1,8 @@
-import React, {FC, useEffect } from 'react'
+import React, {FC, useLayoutEffect } from 'react'
 import { NavLink } from 'react-router-dom';
 
 const SatiatedBear: FC<{}> = () => {
-    useEffect(() => {
+    useLayoutEffect(() => {
       document.body.style.backgroundColor = "black";
       return () => {
         document.body.style.backgroundColor = "lightgray";

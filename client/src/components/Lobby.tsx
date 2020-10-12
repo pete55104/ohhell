@@ -1,11 +1,9 @@
-import React, {Component } from 'react'
+import React, {FC } from 'react'
 
-class Lobby extends Component<{}, {}> {
-    render() {
-        return (
+const Lobby: FC<{}> = () => {
+    return (
           <h1>welcome to the lobby</h1>
-        );
-    }
+    )
 }
 
 export default Lobby;
