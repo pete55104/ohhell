@@ -17,10 +17,10 @@ export function useMessageBus(callback?: ((message: IMessageEvent) => void)) : M
     const [message, setMessage] = useState(initialMessage);
     useEffect(() => {
         client.onopen = () => {
-            console.log(`WebSocket Client Connected: ${client}`);
+            console.debug(`WebSocket Client Connected: ${client}`);
         };
         client.onmessage = (received) => {
-            console.log(`received message ${received.data}`);
+            console.debug(`received message ${received.data}`);
             if(callback){
                 callback(received)
             }
