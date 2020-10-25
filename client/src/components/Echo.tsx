@@ -1,10 +1,8 @@
 import React, {ChangeEvent, FC, FormEvent, useEffect, useRef, useState} from 'react';
 import '../styles/App.scss';
-import {w3cwebsocket as W3CWebSocket} from "websocket";
 import { Redirect } from 'react-router-dom';
-
-const url = 'wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev';
-const client = new W3CWebSocket(url);
+import { useMessageBus } from '../hooks/useMessageBus'
+import { IMessageEvent } from 'websocket';
 
 interface IMessageState {
     data?: string;
@@ -17,7 +15,7 @@ interface IMessageState {
 }
 
 const Echo: FC<{}> = () => {
-    const intial: IMessageState = {
+    const initial: IMessageState = {
         data: "",
         timeStampSent: 0,
         timeStampReceived: 0,
@@ -26,21 +24,11 @@ const Echo: FC<{}> = () => {
         bearHasBeenPoked: false,
         enteredText: ""
     };
-    const textEntryField = useRef<HTMLInputElement>(null)
-    const [messageState, setMessageState] = useState(intial)
 
-    useEffect(() => {
-        textEntryField?.current?.focus()
-    },[])
-
-    useEffect(() => {
-        client.onopen = () => {
-            console.log('WebSocket Client Connected:');
-            console.log(client);
-        };
-        client.onmessage = (message) => {
-            console.log(message);
+    const onMessage = (message: IMessageEvent) => {
+        if(message && message.data){
             writeMessageToScreen(message);
+            
             const newState: IMessageState = {
                 ...messageState,
                 data: message.data.toString() || "",
@@ -54,12 +42,18 @@ const Echo: FC<{}> = () => {
                 newState.bearHasBeenPoked = true
             }
             setMessageState(newState);
-            console.log(messageState.data);
-            console.log(messageState.isTrusted);
-            console.log(messageState.timeStampReceived);
-            console.log(messageState.origin);
-        };
-    })
+        }
+    };
+
+    const { sendMessage }  = useMessageBus(onMessage);
+    const textEntryField = useRef<HTMLInputElement>(null)
+    const [messageState, setMessageState] = useState(initial)
+    
+
+    useEffect(() => {
+        textEntryField?.current?.focus()
+    },[])
+
 
     const writeMessageToScreen = (obj: Object) => {
         let displayDiv = document.getElementById("responseDisplay");
@@ -70,11 +64,11 @@ const Echo: FC<{}> = () => {
                 displayDiv.innerHTML += (prop + " : " + obj[prop] + "\n");
             }
         }
-    }
+    }    
 
     const handleSubmit = (e:  FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        client.send(JSON.stringify({"action":"sendmessage", "data": messageState.enteredText}));
+        sendMessage(messageState.enteredText);
         let timeOfSend = Date.now();
         setMessageState({...messageState, timeStampSent: timeOfSend, enteredText: ""});
 

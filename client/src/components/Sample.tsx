@@ -1,24 +1,29 @@
 import React, { FC, ChangeEvent, useState } from 'react'
 import { NavLink, RouteComponentProps } from 'react-router-dom';
+import { useMessageBus } from '../hooks/useMessageBus'
 
 interface IProps extends RouteComponentProps {
     sampleProp: string,
     initialColor: string
 } 
 
+const stateTicker = { renderCount: 0}
+
 const Sample: FC<IProps> = props => {
     const [color, setColor] = useState(props.initialColor);
     const [truthiness, setTruthiness] = useState(true);
-
+    const { lastMessage, sendMessage }  = useMessageBus();
     const toggleTruthiness = () => {
         setTruthiness(!truthiness)
     }
-
+    stateTicker.renderCount = stateTicker.renderCount + 1;
     const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
-        setColor(event.currentTarget.value)
+        console.log(`render count is ${stateTicker.renderCount}`)
+        setColor(event.currentTarget.value);
+        sendMessage(event.currentTarget.value);
     }
 
-    console.log(props);
+    console.log(`props: ${JSON.stringify(props)}`);
     return (
     <div className="centeringdiv">
         <h1>sample</h1>
@@ -32,6 +37,8 @@ const Sample: FC<IProps> = props => {
             id="color"
             value={color}
             onChange={handleColorChange}/></p>
+    <p>This page's last message is rated at {lastMessage.data}</p>
+    <p>Has been rendered {stateTicker.renderCount}</p>
     </div>
     </div>
     );
