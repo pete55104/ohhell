@@ -6,6 +6,18 @@ type MessageBus = {
     sendMessage: (message: string) => void
 };
 
+enum messageType {
+    broadcast,
+    action,
+    bearPoked
+}
+
+type appMessage<T> = {
+    type: messageType,
+    channel: string,
+    data: T
+}
+
 const url = 'wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev';
 const client = new W3CWebSocket(url);
 
