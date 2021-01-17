@@ -7,8 +7,6 @@ interface IProps extends RouteComponentProps {
     initialColor: string
 } 
 
-const stateTicker = { renderCount: 0}
-
 const Sample: FC<IProps> = props => {
     const [color, setColor] = useState(props.initialColor);
     const [truthiness, setTruthiness] = useState(true);
@@ -16,9 +14,7 @@ const Sample: FC<IProps> = props => {
     const toggleTruthiness = () => {
         setTruthiness(!truthiness)
     }
-    stateTicker.renderCount = stateTicker.renderCount + 1;
     const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
-        console.log(`render count is ${stateTicker.renderCount}`)
         setColor(event.currentTarget.value);
         sendMessage(event.currentTarget.value);
     }
@@ -38,7 +34,6 @@ const Sample: FC<IProps> = props => {
             value={color}
             onChange={handleColorChange}/></p>
     <p>This page's last message is rated at {lastMessage.data}</p>
-    <p>Has been rendered {stateTicker.renderCount}</p>
     </div>
     </div>
     );

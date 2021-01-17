@@ -14,8 +14,6 @@ interface IMessageState {
     enteredText: string;
 }
 
-const renderCountClosure = { renderCount: 0}
-
 const Echo: FC<{}> = () => {
     const initial: IMessageState = {
         data: "",
@@ -51,8 +49,6 @@ const Echo: FC<{}> = () => {
     const textEntryField = useRef<HTMLInputElement>(null)
     const [messageState, setMessageState] = useState(initial)
 
-    renderCountClosure.renderCount = renderCountClosure.renderCount + 1;
-
     useEffect(() => {
         textEntryField?.current?.focus()
     },[])
@@ -86,7 +82,6 @@ const Echo: FC<{}> = () => {
         return (
             <div><h1>you can make a websocket echo here</h1>
             <div className="Echo">
-        <p>render count is {renderCountClosure.renderCount}</p>
                 <form className="Echo-form" onSubmit={handleSubmit}>
                     <ul>
                         <li><input type="text" id="customTextField"  value={messageState.enteredText} onChange={handleInputChange} ref={textEntryField} />
