@@ -1,8 +1,9 @@
 import React, {ChangeEvent, FC, FormEvent, useEffect, useRef, useState} from 'react';
-import '../styles/App.scss';
-import { Redirect } from 'react-router-dom';
-import { useMessageBus } from '../hooks/useMessageBus'
+import { useHistory } from 'react-router-dom';
 import { IMessageEvent } from 'websocket';
+import '../styles/App.scss';
+import { useMessageBus } from '../hooks/useMessageBus'
+
 
 interface IMessageState {
     data?: string;
@@ -40,19 +41,27 @@ const Echo: FC<{}> = () => {
             }
             if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
                 newState.bearHasBeenPoked = true
+                unsubscribe()
             }
             setMessageState(newState);
         }
     };
-
-    const { sendMessage }  = useMessageBus(onMessage);
+    const history = useHistory();
+    const { sendMessage, unsubscribe }  = useMessageBus(onMessage);
     const textEntryField = useRef<HTMLInputElement>(null)
     const [messageState, setMessageState] = useState(initial)
-
     useEffect(() => {
-        textEntryField?.current?.focus()
-    },[])
+        textEntryField?.current?.focus();
 
+    },[])
+    useEffect(() => {
+        return (() => {
+            if(messageState.bearHasBeenPoked){
+                    history.push('/satiated-bear')
+            }
+        })
+    })
+    
 
     const writeMessageToScreen = (obj: Object) => {
         let displayDiv = document.getElementById("responseDisplay");
@@ -67,11 +76,9 @@ const Echo: FC<{}> = () => {
 
     const handleSubmit = (e:  FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        sendMessage(messageState.enteredText);
         let timeOfSend = Date.now();
-        setMessageState({...messageState, timeStampSent: timeOfSend, enteredText: ""});
-
-        console.log(`sending message at time: ${timeOfSend}`);
+        (!messageState.bearHasBeenPoked) && setMessageState({...messageState, timeStampSent: timeOfSend, enteredText: ""});
+        sendMessage(messageState.enteredText);
     }
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -118,7 +125,6 @@ const Echo: FC<{}> = () => {
                 <pre>
                     <div className="echo-response-display" id={"responseDisplay"} />
                 </pre>
-                {messageState.bearHasBeenPoked && <Redirect push to="/satiated-bear" />}
             </div>
             </div>
         );

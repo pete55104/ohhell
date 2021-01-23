@@ -10,7 +10,10 @@ interface IProps extends RouteComponentProps {
 const Sample: FC<IProps> = props => {
     const [color, setColor] = useState(props.initialColor);
     const [truthiness, setTruthiness] = useState(true);
-    const { lastMessage, sendMessage }  = useMessageBus();
+    const { sendMessage }  = useMessageBus();
+    const lastMessage = {
+        data: 'forever'
+    }
     const toggleTruthiness = () => {
         setTruthiness(!truthiness)
     }

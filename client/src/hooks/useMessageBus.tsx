@@ -1,19 +1,26 @@
 import { useState, useEffect } from 'react';
-import {IMessageEvent, w3cwebsocket as W3CWebSocket} from "websocket";
+import { IMessageEvent, w3cwebsocket as W3CWebSocket } from 'websocket';
 
 type MessageBus = {
     lastMessage: IMessageEvent,
-    sendMessage: (message: string) => void
+    sendMessage: (message: string) => void,
+    unsubscribe: () => void
 };
 
-enum messageType {
+enum MessageType {
     broadcast,
     action,
     bearPoked
 }
 
+enum ClientStatus {
+    init,
+    connected,
+    inactive
+}
+
 type appMessage<T> = {
-    type: messageType,
+    type: MessageType,
     channel: string,
     data: T
 }
@@ -27,16 +34,23 @@ const initialMessage: IMessageEvent = {
 
 export function useMessageBus(callback?: ((message: IMessageEvent) => void)) : MessageBus {  
     const [message, setMessage] = useState(initialMessage);
+    const [status, setStatus] = useState<ClientStatus>(ClientStatus.init)
+    const unsubscribe = function() {
+        if(status !== ClientStatus.inactive){
+            setStatus(ClientStatus.inactive)
+        }
+    }
     useEffect(() => {
         client.onopen = () => {
-            console.debug(`WebSocket Client Connected: ${client}`);
+            setStatus(ClientStatus.connected)
         };
-        client.onmessage = (received) => {
-            console.debug(`received message ${received.data}`);
-            if(callback){
-                callback(received)
-            }
-            setMessage(received);
+        client.onmessage = (received: IMessageEvent) => {
+            if(status !== ClientStatus.inactive){
+                if(callback){
+                    callback(received)
+                }
+                setMessage(received);
+            }            
         };
     })
 
@@ -44,6 +58,7 @@ export function useMessageBus(callback?: ((message: IMessageEvent) => void)) : M
         lastMessage: message,
         sendMessage: (message:string) => {
             client.send(JSON.stringify({"action":"sendmessage", "data": message }));
-        }
+        },
+        unsubscribe
     };
 }
