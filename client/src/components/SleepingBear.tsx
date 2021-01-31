@@ -13,7 +13,7 @@ const SleepingBear: FC<{}> = () => {
         sendMessage('caution, bear has been poked!');
     }
 
-    const { lastMessage, sendMessage }  = useMessageBus(onMessage);
+    const { lastMessage, sendMessage }  = useMessageBus({clientId: 'SleepingBear',  callback: onMessage});
 
     return (
         <div className="centeringdiv">

@@ -47,21 +47,22 @@ const Echo: FC<{}> = () => {
         }
     };
     const history = useHistory();
-    const { sendMessage, unsubscribe }  = useMessageBus(onMessage);
+    const { sendMessage, subscribe, unsubscribe }  = useMessageBus({clientId: 'Echo',  callback: onMessage});
+    const unsubscribeRef = useRef<() => void>(unsubscribe)
+    const subscribeRef = useRef<() => void>(subscribe)
+
     const textEntryField = useRef<HTMLInputElement>(null)
     const [messageState, setMessageState] = useState(initial)
     useEffect(() => {
+        subscribeRef.current()
         textEntryField?.current?.focus();
-
     },[])
     useEffect(() => {
+        const unsubscribe = unsubscribeRef.current
         return (() => {
-            if(messageState.bearHasBeenPoked){
-                    history.push('/satiated-bear')
-            }
+            unsubscribe()
         })
-    })
-    
+    }, [history.action])
 
     const writeMessageToScreen = (obj: Object) => {
         let displayDiv = document.getElementById("responseDisplay");
