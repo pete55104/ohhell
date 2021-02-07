@@ -1,4 +1,4 @@
-import React, {useState, useRef, useEffect} from 'react'
+import React from 'react'
 import { Route, Switch, Redirect, NavLink, useHistory } from 'react-router-dom'
 import { IMessageEvent } from 'websocket';
 import './styles/App.scss'
@@ -10,28 +10,22 @@ import Sample from './components/Sample'
 import Nothing from './components/Nothing'
 import { useMessageBus } from './hooks/useMessageBus'
 
+const globalNavWait = 30
+
 function App() {
     const history = useHistory()
-    const [ bearHasBeenPoked, setBearHasBeenPoked] = useState(false)
     const onMessage = (message: IMessageEvent) => {
         console.log(`app on message: ${message.data}`)
         if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
             console.log(`app setting bear poked true`)
-            setBearHasBeenPoked(true)
+            setTimeout(() => {
+                console.log('App: pushing to history')
+                history.push('/satiated-bear')
+            }, globalNavWait)
         }
     }
-    const { subscribe } = useMessageBus({clientId: 'App',  callback: onMessage});
-    const subscribeRef = useRef<() => void>(subscribe)
-    useEffect(() => {
-        subscribeRef.current()
-    },[])
-    useEffect(() => {
-        console.log(`app running bear poked check: ${bearHasBeenPoked}`)
-        if(bearHasBeenPoked){
-            setBearHasBeenPoked(false)
-            history.push('/satiated-bear')
-        }
-    }, [bearHasBeenPoked, history])
+    useMessageBus({clientId: 'App',  callback: onMessage});
+
     return (
         <div className="App">
             <div className="top-menu">
@@ -40,7 +34,6 @@ function App() {
                 <NavLink activeClassName="active" to="/nowhere">nowhere</NavLink>
                 <NavLink activeClassName="active" to="/sleeping-bear">a sleeping bear</NavLink>
                 <NavLink activeClassName="active" to="/echo">echo</NavLink>
-                <span>Bear poke status: {bearHasBeenPoked.toString()}</span>
             </div>
             <Switch>
                 <Route path="/" exact component={Lobby} />

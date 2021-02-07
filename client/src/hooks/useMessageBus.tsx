@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, MutableRefObject } from 'react';
 import { IMessageEvent, w3cwebsocket as W3CWebSocket } from 'websocket';
 
 type MessageBus = {
     lastMessage: IMessageEvent,
     sendMessage: (message: string) => void,
-    unsubscribe: () => void,
+    unsubscribeRef: MutableRefObject<() => void>,
     subscribe: () => void
 };
 
@@ -47,15 +47,6 @@ type clientAction = {
     client: MessageBusClient
 }
 
-// function clientsReducer(state: stateType, action: clientAction): stateType {
-//     switch (action.type){
-//         case 'add':
-//             return { clients: {...state.clients, [action.client.clientId] : action.client}}
-//         default:
-//             throw new Error('no action type')
-//     }
-// }
-
 function clientsReducer(state: stateType, action: clientAction): stateType {
     switch (action.type){
         case 'add':
@@ -85,26 +76,19 @@ const unsubscribe = function(messageBusClient: MessageBusClient) {
 
 const subscribe = function(messageBusClient: MessageBusClient) {
     return () => {
-        if(messageBusClient && (!state.clients[messageBusClient.clientId])){
-            console.log(`mb: ${Date.now()} subscribing ${messageBusClient.clientId} into ${JSON.stringify(state.clients)}`)
-            dispatch({type: 'add', client: messageBusClient})
-        } else {
-            console.log(`mb: ${Date.now()} must have already been subscribed for ${JSON.stringify(messageBusClient)} vs ${JSON.stringify(state.clients)}`)
-        }
+        console.log(`mb: ${Date.now()} subscribing ${messageBusClient.clientId} into ${JSON.stringify(state.clients)}`)
+        dispatch({type: 'add', client: messageBusClient})
     }
 }
 
 export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {  
+    console.log(`mb: entry with ${messageBusClient.clientId}`)
     const [message, setMessage] = useState(initialMessage);
     const [status, setStatus] = useState<ClientStatus>(ClientStatus.init);
-    //const [state, dispatch] = useReducer(clientsReducer, {clients: {}});
 
-    // useEffect(() => subscribe(messageBusClient))
-    // useEffect(() => {
-    //     if(messageBusClient.callback){
-    //         dispatchClients({ type: 'add', client: messageBusClient})
-    //     }
-    // },[messageBusClient.clientId])
+    if(!state.clients[messageBusClient.clientId]){
+        subscribe(messageBusClient)()
+    }
 
     useEffect(() => {
         state.socketClient.onopen = () => {
@@ -134,6 +118,6 @@ export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {
             state.socketClient.send(payload);
         },
         subscribe: subscribe(messageBusClient),
-        unsubscribe: unsubscribe(messageBusClient)
+        unsubscribeRef: useRef(unsubscribe(messageBusClient))
     };
 }

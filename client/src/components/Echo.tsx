@@ -11,7 +11,6 @@ interface IMessageState {
     timeStampReceived?: number;
     origin?: string;
     isTrusted?: boolean;
-    bearHasBeenPoked: boolean;
     enteredText: string;
 }
 
@@ -22,7 +21,6 @@ const Echo: FC<{}> = () => {
         timeStampReceived: 0,
         origin: "",
         isTrusted: true,
-        bearHasBeenPoked: false,
         enteredText: ""
     };
 
@@ -39,22 +37,15 @@ const Echo: FC<{}> = () => {
                 // @ts-ignore
                 isTrusted: message.isTrusted
             }
-            if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
-                newState.bearHasBeenPoked = true
-                unsubscribe()
-            }
             setMessageState(newState);
         }
     };
     const history = useHistory();
-    const { sendMessage, subscribe, unsubscribe }  = useMessageBus({clientId: 'Echo',  callback: onMessage});
-    const unsubscribeRef = useRef<() => void>(unsubscribe)
-    const subscribeRef = useRef<() => void>(subscribe)
+    const { sendMessage, unsubscribeRef }  = useMessageBus({clientId: 'Echo',  callback: onMessage});
 
     const textEntryField = useRef<HTMLInputElement>(null)
     const [messageState, setMessageState] = useState(initial)
     useEffect(() => {
-        subscribeRef.current()
         textEntryField?.current?.focus();
     },[])
     useEffect(() => {
@@ -62,7 +53,7 @@ const Echo: FC<{}> = () => {
         return (() => {
             unsubscribe()
         })
-    }, [history.action])
+    }, [history.action, unsubscribeRef])
 
     const writeMessageToScreen = (obj: Object) => {
         let displayDiv = document.getElementById("responseDisplay");
@@ -78,7 +69,7 @@ const Echo: FC<{}> = () => {
     const handleSubmit = (e:  FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         let timeOfSend = Date.now();
-        (!messageState.bearHasBeenPoked) && setMessageState({...messageState, timeStampSent: timeOfSend, enteredText: ""});
+        setMessageState({...messageState, timeStampSent: timeOfSend, enteredText: ""});
         sendMessage(messageState.enteredText);
     }
 
