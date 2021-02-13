@@ -1,8 +1,10 @@
-import React, {FC } from 'react'
+import React, {FC, useContext } from 'react'
+import { AppContext } from '../App'
 
 const Lobby: FC<{}> = () => {
+    const context = useContext(AppContext)
     return (
-          <h1>welcome to the lobby</h1>
+          <h1>welcome to the lobby, {context.userDisplayName}</h1>
     )
 }
 

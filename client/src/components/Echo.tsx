@@ -1,7 +1,8 @@
-import React, {ChangeEvent, FC, FormEvent, useEffect, useRef, useState} from 'react';
+import React, {ChangeEvent, FC, FormEvent, useEffect, useRef, useState, useContext} from 'react';
 import { useHistory } from 'react-router-dom';
 import '../styles/App.scss';
-import { useMessageBus, defaultChannels, Message } from '../hooks/useMessageBus'
+import { useMessageBus, defaultChannels, Message } from '../hooks/useMessageBus';
+import { AppContext } from '../App'
 
 
 interface IMessageState {
@@ -48,6 +49,7 @@ const Echo: FC<{}> = () => {
             unsubscribe()
         })
     }, [history.action, unsubscribeRef])
+    const context = useContext(AppContext)
 
     const writeMessageToScreen = (message: Message) => {
         let displayDiv = document.getElementById("responseDisplay");
@@ -75,7 +77,7 @@ const Echo: FC<{}> = () => {
 
     if (messageState.isTrusted) {
         return (
-            <div><h1>you can make a websocket echo here</h1>
+            <div><h1>hello {context.userDisplayName}, you can make a websocket echo here</h1>
             <div className="Echo">
                 <form className="Echo-form" onSubmit={handleSubmit}>
                     <ul>

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Route, Switch, Redirect, NavLink, useHistory } from 'react-router-dom'
-import { IMessageEvent } from 'websocket';
+import { v4 as uuidv4 } from 'uuid';
 import './styles/App.scss'
 import Echo from './components/Echo'
 import Lobby from './components/Lobby'
@@ -8,13 +8,25 @@ import SleepingBear from './components/SleepingBear'
 import SatiatedBear from './components/SatiatedBear'
 import Sample from './components/Sample'
 import Nothing from './components/Nothing'
-import { useMessageBus, defaultChannels } from './hooks/useMessageBus'
+import { useMessageBus, defaultChannels, Message } from './hooks/useMessageBus'
 
 const globalNavWait = 30
 
+export type AppContextType = {
+    userId: string,
+    userDisplayName: string
+}
+
+
+const initialId: string = uuidv4()
+export const AppContext = React.createContext({
+    userId: initialId,
+    userDisplayName: initialId.slice(0,8)
+})
+
 function App() {
     const history = useHistory()
-    const onMessage = (message: IMessageEvent) => {
+    const onMessage = (message: Message) => {
         console.log(`app on message: ${message.data}`)
         if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
             console.log(`app setting bear poked true`)
