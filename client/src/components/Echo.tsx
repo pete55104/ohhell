@@ -26,15 +26,10 @@ const Echo: FC<{}> = () => {
     const onMessage = (message: Message) => {
         if(message && message.data){
             writeMessageToScreen(message);
-            
             const newState: IMessageState = {
                 ...messageState,
                 data: message.data.toString() || "",
                 timeStampReceived: Date.now(),
-                // @ts-ignore
-                origin: message.origin,
-                // @ts-ignore
-                isTrusted: message.isTrusted
             }
             setMessageState(newState);
         }
@@ -54,14 +49,14 @@ const Echo: FC<{}> = () => {
         })
     }, [history.action, unsubscribeRef])
 
-    const writeMessageToScreen = (obj: Object) => {
+    const writeMessageToScreen = (message: Message) => {
         let displayDiv = document.getElementById("responseDisplay");
         if (displayDiv){
             displayDiv.innerHTML = "";
-            for (let prop in obj) {
-                //@ts-ignore
-                displayDiv.innerHTML += (prop + " : " + obj[prop] + "\n");
-            }
+            const htmltext = Object.entries(message).map(entry => {
+                return (entry[0] || "") + " : " + (entry[1] || "")
+            }).join("\n")
+            displayDiv.innerHTML += (htmltext);
         }
     }    
 

@@ -50,7 +50,7 @@ const initialMessage: Message = {
     channel: ""
 };
 
-type stateType = {
+type busStateType = {
     clients: Record<string,MessageBusClient>,
     socketClient: W3CWebSocket
 }
@@ -60,7 +60,7 @@ type clientAction = {
     client: MessageBusClient
 }
 
-function clientsReducer(state: stateType, action: clientAction): stateType {
+function clientsReducer(state: busStateType, action: clientAction): busStateType {
     switch (action.type){
         case 'add':
             state.clients[action.client.clientId] = action.client
@@ -74,10 +74,10 @@ function clientsReducer(state: stateType, action: clientAction): stateType {
 }
 
 console.log(`mb socket client initialized`)
-const state:stateType = {clients: {}, socketClient: new W3CWebSocket(url)}
+const busState:busStateType = {clients: {}, socketClient: new W3CWebSocket(url)}
 
 function dispatch(action: clientAction){
-    clientsReducer(state, action)
+    clientsReducer(busState, action)
 }
 
 const unsubscribe = function(messageBusClient: MessageBusClient) {
@@ -89,7 +89,7 @@ const unsubscribe = function(messageBusClient: MessageBusClient) {
 
 const subscribe = function(messageBusClient: MessageBusClient) {
     return () => {
-        console.log(`mb: ${Date.now()} subscribing ${messageBusClient.clientId} into ${JSON.stringify(state.clients)}`)
+        console.log(`mb: ${Date.now()} subscribing ${messageBusClient.clientId} into ${JSON.stringify(busState.clients)}`)
         dispatch({type: 'add', client: messageBusClient})
     }
 }
@@ -99,16 +99,16 @@ export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {
     const [message, setMessage] = useState(initialMessage);
     const [status, setStatus] = useState<ClientStatus>(ClientStatus.init);
 
-    if(!state.clients[messageBusClient.clientId]){
+    if(!busState.clients[messageBusClient.clientId]){
         subscribe(messageBusClient)()
     }
 
     useEffect(() => {
-        state.socketClient.onopen = () => {
+        busState.socketClient.onopen = () => {
             setStatus(ClientStatus.connected)
             console.log(`mb socket client initialized`)
         };
-        state.socketClient.onmessage = (received: IMessageEvent) => {
+        busState.socketClient.onmessage = (received: IMessageEvent) => {
             console.log(`mb handling message ${received.data}`)
             if(status !== ClientStatus.inactive){
                 const { channel, data } = JSON.parse(received.data.toString())
@@ -116,9 +116,8 @@ export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {
                     channel,
                     data
                 }
-                const clientArray = Object.values(state.clients)
+                const clientArray = Object.values(busState.clients)
                 clientArray.forEach(client => {
-                    console.log(`mb invoking callback for ${client.clientId}`)
                     client.callback  && client.channels.includes(channel) && client.callback(message)
                 })
                 setMessage(message);
@@ -133,7 +132,7 @@ export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {
         sendMessage: (message:string, channel:string) => {
             const payload = JSON.stringify({action:"sendmessage", data: JSON.stringify({ channel: channel, data: message }) })
             console.log(`sending message ${payload}`)
-            state.socketClient.send(payload);
+            busState.socketClient.send(payload);
         },
         subscribe: subscribe(messageBusClient),
         unsubscribeRef: useRef(unsubscribe(messageBusClient))
