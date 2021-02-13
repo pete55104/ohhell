@@ -1,8 +1,7 @@
 import React, {ChangeEvent, FC, FormEvent, useEffect, useRef, useState} from 'react';
 import { useHistory } from 'react-router-dom';
-import { IMessageEvent } from 'websocket';
 import '../styles/App.scss';
-import { useMessageBus } from '../hooks/useMessageBus'
+import { useMessageBus, defaultChannels, Message } from '../hooks/useMessageBus'
 
 
 interface IMessageState {
@@ -24,7 +23,7 @@ const Echo: FC<{}> = () => {
         enteredText: ""
     };
 
-    const onMessage = (message: IMessageEvent) => {
+    const onMessage = (message: Message) => {
         if(message && message.data){
             writeMessageToScreen(message);
             
@@ -41,7 +40,7 @@ const Echo: FC<{}> = () => {
         }
     };
     const history = useHistory();
-    const { sendMessage, unsubscribeRef }  = useMessageBus({clientId: 'Echo',  callback: onMessage});
+    const { sendMessage, unsubscribeRef }  = useMessageBus({clientId: 'Echo',  callback: onMessage, channels: [defaultChannels.echo]});
 
     const textEntryField = useRef<HTMLInputElement>(null)
     const [messageState, setMessageState] = useState(initial)
@@ -69,8 +68,10 @@ const Echo: FC<{}> = () => {
     const handleSubmit = (e:  FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         let timeOfSend = Date.now();
+        const text = messageState.enteredText
+        const channel = text === 'poke bear' ? defaultChannels.global : defaultChannels.echo
         setMessageState({...messageState, timeStampSent: timeOfSend, enteredText: ""});
-        sendMessage(messageState.enteredText);
+        sendMessage(messageState.enteredText, channel);
     }
 
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {

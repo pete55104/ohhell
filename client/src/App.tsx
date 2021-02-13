@@ -8,7 +8,7 @@ import SleepingBear from './components/SleepingBear'
 import SatiatedBear from './components/SatiatedBear'
 import Sample from './components/Sample'
 import Nothing from './components/Nothing'
-import { useMessageBus } from './hooks/useMessageBus'
+import { useMessageBus, defaultChannels } from './hooks/useMessageBus'
 
 const globalNavWait = 30
 
@@ -24,7 +24,7 @@ function App() {
             }, globalNavWait)
         }
     }
-    useMessageBus({clientId: 'App',  callback: onMessage});
+    useMessageBus({clientId: 'App',  callback: onMessage, channels: [defaultChannels.global]});
 
     return (
         <div className="App">

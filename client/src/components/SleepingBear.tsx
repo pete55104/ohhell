@@ -1,18 +1,17 @@
 import React, { FC } from 'react';
-import { IMessageEvent } from 'websocket';
-import { useMessageBus } from '../hooks/useMessageBus'
+import { useMessageBus, defaultChannels, Message } from '../hooks/useMessageBus'
 
 
 const SleepingBear: FC<{}> = () => {
-    const onMessage = (message: IMessageEvent) => {
+    const onMessage = (message: Message) => {
         console.log(`sleeping bear noticed message with data ${JSON.stringify(message.data)}`)
     };
 
     const wakeBear = () => {
-        sendMessage('caution, bear has been poked!');
+        sendMessage('caution, bear has been poked!', defaultChannels.global);
     }
 
-    const { sendMessage }  = useMessageBus({clientId: 'SleepingBear',  callback: onMessage});
+    const { sendMessage }  = useMessageBus({clientId: 'SleepingBear',  callback: onMessage, channels:[]});
 
     return (
         <div className="centeringdiv">

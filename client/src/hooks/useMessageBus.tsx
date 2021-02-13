@@ -3,15 +3,27 @@ import { IMessageEvent, w3cwebsocket as W3CWebSocket } from 'websocket';
 
 type MessageBus = {
     lastMessage: IMessageEvent,
-    sendMessage: (message: string) => void,
+    sendMessage: (message: string, channel: string) => void,
     unsubscribeRef: MutableRefObject<() => void>,
     subscribe: () => void
 };
 
 export type MessageBusClient = {
     clientId: string,
-    callback?: ((message: IMessageEvent) => void)
+    callback?: ((message: Message) => void),
+    channels: string[]
 }
+
+export type Message = {
+    channel: string,
+    data: any
+}
+
+export enum defaultChannels {
+    global = 'GLOBAL',
+    echo = 'ECHO'
+}
+
 
 enum MessageType {
     broadcast,
@@ -33,8 +45,9 @@ type appMessage<T> = {
 
 const url = 'wss://ncqq73m9x7.execute-api.us-east-1.amazonaws.com/dev';
 
-const initialMessage: IMessageEvent = {
-    data: ""
+const initialMessage: Message = {
+    data: "",
+    channel: ""
 };
 
 type stateType = {
@@ -98,12 +111,17 @@ export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {
         state.socketClient.onmessage = (received: IMessageEvent) => {
             console.log(`mb handling message ${received.data}`)
             if(status !== ClientStatus.inactive){
+                const { channel, data } = JSON.parse(received.data.toString())
+                const message: Message = {
+                    channel,
+                    data
+                }
                 const clientArray = Object.values(state.clients)
                 clientArray.forEach(client => {
                     console.log(`mb invoking callback for ${client.clientId}`)
-                    client.callback && client.callback(received)
+                    client.callback  && client.channels.includes(channel) && client.callback(message)
                 })
-                setMessage(received);
+                setMessage(message);
             } else {
                 console.log(`mb status inactive, ignoring message`)
             }           
@@ -112,8 +130,8 @@ export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {
 
     return {
         lastMessage: message,
-        sendMessage: (message:string) => {
-            const payload = JSON.stringify({"action":"sendmessage", "data": message })
+        sendMessage: (message:string, channel:string) => {
+            const payload = JSON.stringify({action:"sendmessage", data: JSON.stringify({ channel: channel, data: message }) })
             console.log(`sending message ${payload}`)
             state.socketClient.send(payload);
         },

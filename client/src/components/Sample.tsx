@@ -10,7 +10,7 @@ interface IProps extends RouteComponentProps {
 const Sample: FC<IProps> = props => {
     const [color, setColor] = useState(props.initialColor);
     const [truthiness, setTruthiness] = useState(true);
-    const { sendMessage }  = useMessageBus({clientId: 'Sample'});
+    const { sendMessage }  = useMessageBus({clientId: 'Sample', channels: ['Sample']});
     const lastMessage = {
         data: 'forever'
     }
@@ -19,7 +19,7 @@ const Sample: FC<IProps> = props => {
     }
     const handleColorChange = (event: ChangeEvent<HTMLInputElement>) => {
         setColor(event.currentTarget.value);
-        sendMessage(event.currentTarget.value);
+        sendMessage(event.currentTarget.value, 'Sample');
     }
 
     console.log(`props: ${JSON.stringify(props)}`);
