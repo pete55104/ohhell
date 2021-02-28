@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, MutableRefObject } from 'react';
+import { useState, useEffect, useRef, MutableRefObject, useMemo } from 'react';
 import { IMessageEvent, w3cwebsocket as W3CWebSocket } from 'websocket';
 
 type MessageBus = {
@@ -21,7 +21,8 @@ export type Message = {
 
 export enum defaultChannels {
     global = 'GLOBAL',
-    echo = 'ECHO'
+    echo = 'ECHO',
+    chat = 'CHAT'
 }
 
 
@@ -98,7 +99,11 @@ export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {
     console.log(`mb: entry with ${messageBusClient.clientId}`)
     const [message, setMessage] = useState(initialMessage);
     const [status, setStatus] = useState<ClientStatus>(ClientStatus.init);
-
+    const sendMessage = useMemo(() => (message:string, channel:string) => {
+        const payload = JSON.stringify({action:"sendmessage", data: JSON.stringify({ channel: channel, data: message }) })
+        console.log(`sending message ${payload}`)
+        busState.socketClient.send(payload)
+    },[])
     if(!busState.clients[messageBusClient.clientId]){
         subscribe(messageBusClient)()
     }
@@ -129,11 +134,7 @@ export function useMessageBus(messageBusClient: MessageBusClient) : MessageBus {
 
     return {
         lastMessage: message,
-        sendMessage: (message:string, channel:string) => {
-            const payload = JSON.stringify({action:"sendmessage", data: JSON.stringify({ channel: channel, data: message }) })
-            console.log(`sending message ${payload}`)
-            busState.socketClient.send(payload);
-        },
+        sendMessage,
         subscribe: subscribe(messageBusClient),
         unsubscribeRef: useRef(unsubscribe(messageBusClient))
     };

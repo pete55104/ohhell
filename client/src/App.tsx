@@ -10,13 +10,12 @@ import Sample from './components/Sample'
 import Nothing from './components/Nothing'
 import { useMessageBus, defaultChannels, Message } from './hooks/useMessageBus'
 
-const globalNavWait = 30
+export const globalNavWait = 30
 
 export type AppContextType = {
     userId: string,
     userDisplayName: string
 }
-
 
 const initialId: string = uuidv4()
 export const AppContext = React.createContext({
@@ -25,18 +24,19 @@ export const AppContext = React.createContext({
 })
 
 function App() {
-    const history = useHistory()
-    const onMessage = (message: Message) => {
-        console.log(`app on message: ${message.data}`)
-        if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
-            console.log(`app setting bear poked true`)
-            setTimeout(() => {
-                console.log('App: pushing to history')
-                history.push('/satiated-bear')
-            }, globalNavWait)
-        }
-    }
-    useMessageBus({clientId: 'App',  callback: onMessage, channels: [defaultChannels.global]});
+    console.log('app render')
+    // const history = useHistory()
+    // const onMessage = (message: Message) => {
+    //     console.log(`app on message: ${message.data}`)
+    //     if(message.data.toString().includes("poke") && message.data.toString().includes("bear")){
+    //         console.log(`app setting bear poked true`)
+    //         setTimeout(() => {
+    //             console.log('App: pushing to history')
+    //             history.push('/satiated-bear')
+    //         }, globalNavWait)
+    //     }
+    // }
+    // useMessageBus({clientId: 'App',  callback: onMessage, channels: [defaultChannels.global]});
 
     return (
         <div className="App">

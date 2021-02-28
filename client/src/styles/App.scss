@@ -87,3 +87,8 @@ h1 {
   display: inline-block;
   margin-left: 3em;
 }
+
+.widget-row {
+ display: flex;
+ flex-direction:row;
+}
