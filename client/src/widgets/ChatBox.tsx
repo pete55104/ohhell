@@ -32,11 +32,11 @@ const initialState: State = {
 }
 
 const ChatBox: FC<{}> = () => {
-    function chatLogReducer(state: State, action: Action){
+    const chatLogReducer = (state: State, action: Action) => {
         console.log(`chatbox reducer executing`)
         switch(action.type){
             case chatLogReducerOptions.add: {
-                const lastTenChats = state.messages.slice(-10)
+                const lastTenChats = state.messages.slice(-9)
                 const nextChat =  {
                     text: action.message.data,
                     userId: 'somebodyId',
@@ -58,7 +58,7 @@ const ChatBox: FC<{}> = () => {
     const textEntryField = useRef<HTMLInputElement>(null)
     function onMessage(message: Message) {
         if(message && message.data){
-            console.log(`chatbox firing dispatch with ${JSON.stringify(message)}`)
+            console.log(`chatbox calling dispatch with ${JSON.stringify(message)}`)
             const action: Action = { type: chatLogReducerOptions.add,  message}
             chatLogDispatch(action)
         }
@@ -74,7 +74,16 @@ const ChatBox: FC<{}> = () => {
         const text = textEntryField?.current?.value
         const channel = defaultChannels.chat
         // onMessage({ channel, data: 'placeholder ride along' })
-        sendMessage (text || '', channel);
+        // sendMessage (text || '', channel);
+        const message = {
+            data: text || '',
+            channel
+        }
+        if(message && message.data){
+            console.log(`chatbox calling dispatch with ${JSON.stringify(message)}`)
+            const action: Action = { type: chatLogReducerOptions.add,  message}
+            chatLogDispatch(action)
+        }
         textEntryField.current && (textEntryField.current.value = '')
     }
 
@@ -86,7 +95,7 @@ const ChatBox: FC<{}> = () => {
                 <input type="submit" value="send your custom text" />
             </form>
             {<ul>{chatLogState.messages.map(
-                (message: chatMessage) => <li key={'chatline-' + message.timeReceived}><span>{message.timeReceived} - {message.displayName} said {message.text}</span></li>
+                (message: chatMessage, index: number) => <li key={'chatline-' + index}><span>{message.timeReceived} - {message.displayName} said {message.text}</span></li>
             )}</ul>}
         </div>
     );
